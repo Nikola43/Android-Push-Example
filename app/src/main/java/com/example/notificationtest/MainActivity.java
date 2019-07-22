@@ -11,6 +11,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
+import com.onesignal.OSPermissionSubscriptionState;
 import com.onesignal.OneSignal;
 
 import java.util.Objects;
@@ -18,7 +19,8 @@ import java.util.Objects;
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "PUSH";
-    private String token;
+    private String firebaseToken;
+    private String oneSignalToken;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,12 +44,15 @@ public class MainActivity extends AppCompatActivity {
                             Log.w(TAG, "getInstanceId failed", task.getException());
                             return;
                         }
-                        // Get new Instance ID token
-                        token = Objects.requireNonNull(task.getResult()).getToken();
+                        // Get new Instance ID firebaseToken
+                        firebaseToken = Objects.requireNonNull(task.getResult()).getToken();
                         // Log and toast
-                        String msg =  "Token: " + token;
+                        String msg =  "Firebase Token: " + firebaseToken;
+                        Log.d(TAG, msg + oneSignalToken);
                         Log.d(TAG, msg);
-                        Toast.makeText(MainActivity.this, msg, Toast.LENGTH_LONG).show();
+
+                        //TODO
+                        // update firebase token
                     }
                 });
 
@@ -57,12 +62,20 @@ public class MainActivity extends AppCompatActivity {
                 .unsubscribeWhenNotificationsAreDisabled(true)
                 .init();
 
-
         OneSignal.idsAvailable(new OneSignal.IdsAvailableHandler() {
             @Override
             public void idsAvailable(String userId, String registrationId) {
-                if (registrationId != null){}
+                // get onesignal token
+                OSPermissionSubscriptionState status = OneSignal.getPermissionSubscriptionState();
+                oneSignalToken = status.getSubscriptionStatus().getUserId();
+
+                Log.d(TAG, "OneSignal userId " + oneSignalToken);
+                //Toast.makeText(MainActivity.this, "onesignal userId " + oneSignalToken, Toast.LENGTH_LONG).show();
+
+                //TODO
+                // update oneSignal token
             }
         });
     }
+
 }
